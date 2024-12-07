@@ -1,3 +1,4 @@
+clear all
 % Read an RGB image
 rgbImage = imread('caycon.jpg');
 
@@ -137,33 +138,35 @@ title('Hidden Message Image');
 embedSizeRows = round(size(magnitudeA, 1) / 8); % Size of the rectangular region
 embedSizeCols = round(size(magnitudeA, 2) / 8);
 hiddenMessageResized = imresize(hiddenMessageImage, [embedSizeRows, embedSizeCols]);
+
 % Amplification factor
-amplification = 10; % Increase embedding strength (adjust as needed)
+amplification = 8; % Increase embedding strength (adjust as needed)
 
 % Normalize and scale the hidden message to the FFT range
 maxMagnitude = max(magnitudeA(:));
-hiddenMessageResized = imresize(hiddenMessageImage, [embedSizeRows, embedSizeCols]);
 hiddenMessageResized = hiddenMessageResized * maxMagnitude / amplification;
 
-% Define the rectangular embedding region in the middle of the spectrum
+% Define the rectangular embedding region next to the center
 centerRow = floor(size(magnitudeA, 1) / 2); % Middle row
 centerCol = floor(size(magnitudeA, 2) / 2); % Middle column
-startRow = centerRow - floor(embedSizeRows / 2);
-startCol = centerCol - floor(embedSizeCols / 2);
+startRow = centerRow - floor(embedSizeRows / 2); % Vertically aligned
+startCol = centerCol + embedSizeCols; % Start next to the center horizontally
 
-% Embed the hidden message into the middle region
+% Embed the hidden message into the next-to-center region
 for i = 1:embedSizeRows
     for j = 1:embedSizeCols
         magnitudeA(startRow + i - 1, startCol + j - 1) = ...
             magnitudeA(startRow + i - 1, startCol + j - 1) + hiddenMessageResized(i, j);
     end
 end
+
 % Visualize the modified magnitude spectrum
 figure;
 imagesc(log(1 + abs(magnitudeA))); % Log scaling for better visualization
 colormap jet;
 colorbar;
-title('Modified Magnitude Spectrum with Hidden Message Blended in the Middle');
+title('Modified Magnitude Spectrum with Hidden Message on Right of Center');
+
 % Combine the modified magnitude spectrum with the original phase spectrum
 modifiedFFT_A = magnitudeA .* exp(1i * phaseA);
 

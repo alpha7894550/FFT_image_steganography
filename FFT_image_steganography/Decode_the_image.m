@@ -1,21 +1,10 @@
+clear all
 % Read the stego image
 stegoRgbImage = imread('stego_image_with_hidden_message.png'); % Load the saved stego image
 
 % Convert the stego image to LAB color space
 stegoLabImage = rgb2lab(stegoRgbImage);
 
-%require as key factor to open the message
-%START
-
-% Define the dimensions of the original hidden message
-originalRows = 100; % Height of the hidden message
-originalCols = 300; % Width of the hidden message
-% Amplification factor (must match encoding process)
-amplification = 10; % Same as used during encoding
-% Define the embedding region size (must match encoding process)
-embedSizeRows = round(size(magnitudeDecodedA, 1) / 8); % Embedding region height
-embedSizeCols = round(size(magnitudeDecodedA, 2) / 8); % Embedding region width
-%END
 % Extract the a* channel
 decodedA = stegoLabImage(:,:,2);
 
@@ -24,15 +13,30 @@ fftDecodedA = fft2(decodedA);
 fftDecodedA_shifted = fftshift(fftDecodedA); % Center the zero-frequency component
 magnitudeDecodedA = abs(fftDecodedA_shifted); % Compute the magnitude spectrum
 
-% Define the rectangular region for decoding (middle of the frequency domain)
+% Required as key factors to open the message
+% START
+% Amplification factor (must match encoding process)
+amplification = 8; % Same as used during encoding
+
+% Define the embedding region size (must match encoding process)
+embedSizeRows = round(size(magnitudeDecodedA, 1) / 8); % Embedding region height
+embedSizeCols = round(size(magnitudeDecodedA, 2) / 8); % Embedding region width
+
+% Define the dimensions of the original hidden message
+originalRows = 100; % Height of the hidden message
+originalCols = 300; % Width of the hidden message
+% END
+
+% Define the rectangular region for decoding (next to the center in the frequency domain)
 centerRow = floor(size(magnitudeDecodedA, 1) / 2); % Middle row
 centerCol = floor(size(magnitudeDecodedA, 2) / 2); % Middle column
-startRow = centerRow - floor(embedSizeRows / 2); % Top-left corner of the embedding region
-startCol = centerCol - floor(embedSizeCols / 2); % Top-left corner of the embedding region
+startRow = centerRow - floor(embedSizeRows / 2); % Vertically aligned
+startCol = centerCol + embedSizeCols; % Start next to the center horizontally
 
-% Extract the same middle region from the FFT spectrum
+% Extract the same next-to-center region from the FFT spectrum
 extractedRegion = magnitudeDecodedA(startRow:startRow + embedSizeRows - 1, ...
                                      startCol:startCol + embedSizeCols - 1);
+
 
 % Amplify the extracted region to restore visibility
 amplifiedRegion = extractedRegion * amplification;
@@ -53,7 +57,6 @@ decodedMessage = imbinarize(decodedMessage, 0.3);
 figure;
 imshow(decodedMessage, []);
 title('Decoded Hidden Message (Amplified)');
-
 
 % Visualize the magnitude spectrum of the decoded a* channel
 figure;
