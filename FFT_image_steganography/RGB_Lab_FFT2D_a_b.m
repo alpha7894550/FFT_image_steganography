@@ -132,6 +132,11 @@ figure;
 imshow(hiddenMessageImage, []);
 title('Hidden Message Image');
 
+% Resize the hidden message to match the embedding region
+[hiddenRows, hiddenCols] = size(hiddenMessageImage);
+embedSizeRows = round(size(magnitudeA, 1) / 8); % Size of the rectangular region
+embedSizeCols = round(size(magnitudeA, 2) / 8);
+hiddenMessageResized = imresize(hiddenMessageImage, [embedSizeRows, embedSizeCols]);
 % Amplification factor
 amplification = 10; % Increase embedding strength (adjust as needed)
 

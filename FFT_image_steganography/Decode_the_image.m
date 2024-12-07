@@ -4,6 +4,18 @@ stegoRgbImage = imread('stego_image_with_hidden_message.png'); % Load the saved 
 % Convert the stego image to LAB color space
 stegoLabImage = rgb2lab(stegoRgbImage);
 
+%require as key factor to open the message
+%START
+
+% Define the dimensions of the original hidden message
+originalRows = 100; % Height of the hidden message
+originalCols = 300; % Width of the hidden message
+% Amplification factor (must match encoding process)
+amplification = 10; % Same as used during encoding
+% Define the embedding region size (must match encoding process)
+embedSizeRows = round(size(magnitudeDecodedA, 1) / 8); % Embedding region height
+embedSizeCols = round(size(magnitudeDecodedA, 2) / 8); % Embedding region width
+%END
 % Extract the a* channel
 decodedA = stegoLabImage(:,:,2);
 
