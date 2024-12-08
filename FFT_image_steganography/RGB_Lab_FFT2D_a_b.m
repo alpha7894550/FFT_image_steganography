@@ -121,7 +121,7 @@ zlabel('Magnitude (Log Scale)');
 view(3); % 3D view angle
 
 % Create a grayscale image of the message
-message = 'Death Standing';
+message = 'Death Stranding';
 fontSize = 20; % Adjust font size
 hiddenMessageImage = insertText(zeros(100, 300), [10, 40], message, ...
     'FontSize', fontSize, 'BoxOpacity', 0, 'TextColor', 'white');
