@@ -140,7 +140,7 @@ embedSizeCols = round(size(magnitudeA, 2) / 8);
 hiddenMessageResized = imresize(hiddenMessageImage, [embedSizeRows, embedSizeCols]);
 
 % Amplification factor
-amplification = 8; % Increase embedding strength (adjust as needed)
+amplification = 20; % Increase embedding strength (adjust as needed)
 
 % Normalize and scale the hidden message to the FFT range
 maxMagnitude = max(magnitudeA(:));

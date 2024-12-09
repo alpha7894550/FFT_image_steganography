@@ -1,45 +1,79 @@
-% Step 1: Load the Data
-%VS1_1_p54_shading66.csv
-%VS_normal_condition.csv
-%S1_10_p18_R.csv
-% Fault detection test data
-fault_file = 'Data for testing/Test/VS1_1_p54_shading66.csv';
-fault_data = readtable(fault_file);
-fault_signal = fault_data{:, 1}; % Assume voltage data is in the first column
+% Clear the workspace and command window
+clear all;
+clc;
 
-% Step 2: Define Sampling Rate and Time Axis
-fs = 100; % Sampling frequency in Hz
-num_samples = length(fault_signal); % Total number of samples
-time_axis = (0:num_samples-1) / fs; % Time in seconds
+% Load the signal from a CSV file
+% Ensure the CSV file has a single column with signal values
+filename = 'signal.csv'; % Replace with your CSV file name
+signal = csvread(filename);
 
-% Step 3: Define Threshold Parameters
-threshold_low = 30; % Low voltage threshold
-threshold_high = 50; % High voltage threshold
+% Define sampling frequency and signal properties
+Fs = 100; % Sampling frequency in Hz (modify as per your signal)
+T = 1 / Fs; % Sampling period
+L = length(signal); % Length of the signal
+t = (0:L-1) * T; % Time vector
 
-% Step 4: Fault Detection using Threshold Method
-threshold_faults = (fault_signal < threshold_low) | (fault_signal > threshold_high);
-
-% Step 5: Visualize Results
+% Plot the signal
 figure;
+plot(t, signal);
+title('Input Signal in Time Domain');
+xlabel('Time (s)');
+ylabel('Amplitude (V)');
 
-% Plot original fault signal with thresholds
-subplot(2, 1, 1);
-plot(time_axis, fault_signal, 'b-', 'LineWidth', 1.5); % Use time_axis for x-axis
-hold on;
-yline(threshold_low, 'r--', 'LineWidth', 1.2, 'Label', 'Low Threshold');
-yline(threshold_high, 'r--', 'LineWidth', 1.2, 'Label', 'High Threshold');
-title('Fault Signal with Thresholds');
-xlabel('Time (seconds)');
-ylabel('Voltage (V)');
-grid on;
+% Frequency domain analysis
+% Perform FFT
+Y = fft(signal);
+P2 = abs(Y / L); % Two-sided amplitude spectrum
+P1 = P2(1:L/2+1); % Single-sided spectrum
+P1(2:end-1) = 2 * P1(2:end-1);
+f = Fs * (0:(L/2)) / L; % Frequency vector
 
-% Plot threshold-based fault detection
-subplot(2, 1, 2);
-plot(time_axis, fault_signal, 'b-', 'LineWidth', 1.5); % Use time_axis for x-axis
-hold on;
-plot(time_axis(threshold_faults), fault_signal(threshold_faults), 'ro', 'MarkerSize', 6);
-title('Fault Detection: Threshold Method');
-xlabel('Time (seconds)');
-ylabel('Voltage (V)');
-legend('Signal', 'Faults Detected');
-grid on;
+% Plot FFT
+figure;
+plot(f, P1);
+title('Frequency Domain Analysis (FFT)');
+xlabel('Frequency (Hz)');
+ylabel('Amplitude |P1(f)|');
+
+% Check for faults in the frequency domain
+faultIndices = f > 2; % Frequencies greater than 2 Hz
+faultMagnitudes = P1(faultIndices); % Magnitudes at fault frequencies
+
+% Define a threshold for significant noise
+faultThreshold = 0.1 * max(P1); % 10% of max magnitude
+if any(faultMagnitudes > faultThreshold)
+    disp('Fault Detected: Significant Noise Above 2 Hz in Frequency Domain');
+else
+    disp('No Fault Detected in Frequency Domain');
+end
+
+% Extract the noise in the frequency domain (frequencies > 2 Hz)
+[b, a] = butter(4, [2, Fs/2-1] / (Fs/2), 'bandpass'); % Bandpass filter
+faultSignal = filter(b, a, signal);
+
+% Plot the reconstructed fault signal in time domain
+figure;
+plot(t, faultSignal);
+title('Fault Signal Isolated in Time Domain');
+xlabel('Time (s)');
+ylabel('Amplitude (V)');
+
+% Check for faults in the time domain
+voltageLowerLimit = 30; % Lower voltage range
+voltageUpperLimit = 50; % Upper voltage range
+outOfRangeIndices = (signal < voltageLowerLimit) | (signal > voltageUpperLimit);
+
+if any(outOfRangeIndices)
+    disp('Fault Detected: Voltage Out of Range in Time Domain');
+else
+    disp('No Voltage Fault Detected in Time Domain');
+end
+
+% Plot the time-domain signal with fault regions highlighted
+figure;
+plot(t, signal, 'b'); hold on;
+plot(t(outOfRangeIndices), signal(outOfRangeIndices), 'ro');
+title('Signal with Voltage Faults Highlighted');
+xlabel('Time (s)');
+ylabel('Amplitude (V)');
+legend('Signal', 'Faults');

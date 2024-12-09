@@ -16,7 +16,7 @@ magnitudeDecodedA = abs(fftDecodedA_shifted); % Compute the magnitude spectrum
 % Required as key factors to open the message
 % START
 % Amplification factor (must match encoding process)
-amplification = 8; % Same as used during encoding
+amplification = 1; % Same as used during encoding
 
 % Define the embedding region size (must match encoding process)
 embedSizeRows = round(size(magnitudeDecodedA, 1) / 8); % Embedding region height
