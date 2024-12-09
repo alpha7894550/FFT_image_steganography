@@ -5,7 +5,7 @@ t_original = linspace(0, T, fs_original); % Time points for original signal
 signal_original = 5 + 2 * cos(2 * pi * t_original - pi/2) + 3 * cos(4 * pi * t_original); % Original signal
 
 % Define the sampled signal
-fs_sampled = 8; % Sampling rate (samples per second)
+fs_sampled = 100; % Sampling rate (samples per second)
 t_sampled = linspace(0, T, fs_sampled); % Sampled time points
 signal_sampled = 5 + 2 * cos(2 * pi * t_sampled - pi/2) + 3 * cos(4 * pi * t_sampled); % Sampled signal
 
